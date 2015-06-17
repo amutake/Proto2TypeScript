@@ -1,0 +1,171 @@
+syntax = "proto3";
+
+package LSTransmission;
+
+// It's a WGS 84 location
+message LatLng {
+	double lat = 1;
+	double lng = 2;
+}
+
+message AgeModel {
+	uint32 Value = 1;
+	string Unit = 2;
+}
+
+message BloodPressureModel {
+	int32 SystolicBloodPressure = 1;
+	int32 DiastolicBloodPressure = 2;
+}
+
+message VitalSignsModel {
+	BloodPressureModel BloodPressure = 1;
+	int32 PulseRate = 2;
+	int32 RespiratoryRate = 3;
+	double Temperature = 4;
+	uint64 DateTime = 5;
+}
+
+message TriageInfoModel {
+	string ReportProviderId = 1;
+	string ReportId = 2;
+	uint64 ReportDateTime = 3;
+}
+
+
+message HelpBeaconModel {
+	string HelpBeaconID = 1;
+	string BasicID = 2;
+	string Message = 3;
+	uint64 LastScanDateTime = 4;
+	bool Notified = 5;
+	bool Rescued  = 6;
+	bool Safe = 7;
+
+	uint64 AdvertisedDateTime = 8;
+	string Name = 9;
+	string Imei = 10;
+	string Source = 11;
+	uint64 Time = 12;
+
+	LatLng Location = 13;
+
+    //	repeated HelpBeaconModel.DictionaryEntry DistributionDictionay = 14;
+    map<string, string> DistributionDictionay = 14;
+}
+
+message IncidentObjectModel {
+	string GraphicID = 1;
+	string GraphicValue = 2;
+	string Description = 3;
+
+	LatLng GraphicMinPosition = 4;
+	LatLng GraphicMaxPosition = 5;
+
+	repeated LatLng LinearRingPointList = 6;
+}
+
+message MediaModel {
+	string Title = 1;
+	uint64 AvailableDateTime = 2;
+	repeated string Tags = 3;
+	string LocalFileUriString = 4;
+	string UriString = 5;
+	int32 Type = 6;
+	LatLng Location = 7;
+	string Description = 8;
+	string Author = 9;
+	string SubeventKeywords = 10;
+	string GroupName = 11;
+}
+
+message MessengerModel {
+	string MessageID = 1;
+	string SenderID = 2;
+	string ActionPlan = 3;
+	uint64 SentDateTime = 4;
+}
+
+message PatientModel {
+	string Id = 1;
+	TriageInfoModel TriageInfo = 2;
+	AgeModel Age = 3;
+	string Sex = 4;
+	TriageStatusEnum TriageStatus = 5;
+	string IncidentId = 6;
+	LatLng Location = 7;
+	string PersonalIdNumber = 8;
+	repeated VitalSignsModel VitalSigns = 9;
+	string TransferredToDestination = 10;
+	bool Transporting = 11;
+
+	enum TriageStatusEnum {
+		RED = 0;
+		YELLOW = 1;
+		GREEN = 2;
+		BLACK = 3;
+		WHITE = 4;
+	}
+}
+
+
+message ResourceMobilizationModel {
+	string ResourceMobilizationID = 1;
+	LatLng Location = 2;
+	string Task = 3;
+	int32 NumberOfFireVehicles = 4;
+	int32 NumberOfFirePersonnel = 5;
+	int32 NumberOfMedicVehicles = 6;
+	int32 NumberOfMedicPersonnel = 7;
+	int32 NumberOfPoliceVehicles = 8;
+	int32 NumberOfPolicePersonnel = 9;
+}
+
+message ResourceStatusModel {
+	string ResourceID = 1;
+	string type = 2;
+	string Assignment = 3;
+	string Name = 4;
+	string Status = 5;
+	LatLng Location = 6;
+}
+
+
+
+message Error {
+	Status status = 1;
+	string message = 2;
+	enum Status {
+		BANANA = 0;
+		LINKSMART_ERROR = 1;
+		LSCOMM_ERROR = 2;
+		LSTRANSMISSION_ERROR = 3;
+		GENERIC_ERROR = 4;
+		CLIENT_ERROR = 5;
+	}
+}
+
+// The transaction is the same in both ways
+// The client and the server use same messages
+message Transaction {
+
+	message Content {
+		repeated HelpBeaconModel HelpBeaconList = 1;
+		repeated IncidentObjectModel IncidentObjectList = 2;
+		repeated MediaModel MediaList = 3;
+		repeated MessengerModel MessengerList = 4;
+		repeated PatientModel PatientList = 5;
+		repeated ResourceMobilizationModel ResourceMobilizationList = 6;
+		repeated ResourceStatusModel ResourceStatusList = 7;
+	}
+
+	// Elements to publish
+	Content PublishList = 1;
+
+	// Elements to remove
+	Content RemoveList = 2;
+
+	// This will be empty in general if everything
+	// works fine
+	repeated Error ErrorList = 3;
+}
